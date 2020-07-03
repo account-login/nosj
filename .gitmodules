@@ -1,0 +1,6 @@
+[submodule "submodules/doctest"]
+	path = submodules/doctest
+	url = https://github.com/onqtam/doctest.git
+[submodule "submodules/JSONTestSuite"]
+	path = submodules/JSONTestSuite
+	url = https://github.com/nst/JSONTestSuite.git
