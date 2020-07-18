@@ -2,12 +2,16 @@
 #include "../submodules/doctest/doctest/doctest.h"
 
 // system
-#include <math.h>
+#include <cmath>
 // proj
 #include "../j/j.h"
 
 
 #define STR(...) #__VA_ARGS__
+
+
+using std::isinf;
+using std::isnan;
 
 
 TEST_CASE("parser.coverage.ok") {

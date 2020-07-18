@@ -144,7 +144,7 @@ namespace j {
                     // bad array index
                     return NULL;
                 }
-                ref = ((const ArrayResult)t).at(idx).ref;
+                ref = t.at(idx).ref;
             } else {
                 // bad node type
                 return NULL;

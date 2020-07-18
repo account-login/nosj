@@ -2,12 +2,15 @@
 #include "../submodules/doctest/doctest/doctest.h"
 
 // system
-#include <math.h>
+#include <cmath>
 // proj
 #include "../j/j.h"
 
 
 #define STR(...) #__VA_ARGS__
+
+
+using std::fpclassify;
 
 
 TEST_CASE("dumper") {
