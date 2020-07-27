@@ -151,6 +151,9 @@ namespace j {
             }
         }   // while (ref && pointer[0])
 
+        if (ref && ref->type == T_DEL) {
+            ref = NULL;
+        }
         return ref;
     }
 
@@ -262,13 +265,14 @@ namespace j {
         if (it != ref->keys.end()) {
             r.ref = &ref->values[it->second];
         }
+        if (r.ref && r.ref->type == T_DEL) {
+            r.ref = NULL;
+        }
         return r;
     }
     ConstMapIterator MapResult::iter() const {
         ConstMapIterator r;
-        if (ref) {
-            r.ref = ref;
-        }
+        r.ref = ref;
         return r;
     }
 

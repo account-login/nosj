@@ -53,19 +53,3 @@ TEST_CASE("dumper") {
     doc.set_arr().push_back().set_u64(3);
     CHECK(STR([1,3]) == d.dump(doc));
 }
-
-// NOTE: this is testing the writer actually
-TEST_CASE("dumper.nan.inf") {
-    j::Doc doc;
-    j::Dumper d;
-
-    doc.set_double(0.0 / 0.0);
-    CHECK(FP_NAN == fpclassify(0.0 / 0.0));
-    CHECK("NaN" == d.dump(doc));
-
-    doc.set_double(1.0 / 0.0);
-    CHECK("Infinity" == d.dump(doc));
-
-    doc.set_double(-1.0 / 0.0);
-    CHECK("-Infinity" == d.dump(doc));
-}

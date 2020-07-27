@@ -221,9 +221,7 @@ namespace j {
     }
     MapIterator MapResult::iter() {
         MapIterator r;
-        if (ref) {
-            r.ref = ref;
-        }
+        r.ref = ref;
         return r;
     }
     bool MapResult::erase(const char *key) {
@@ -249,6 +247,17 @@ namespace j {
             r.ref = ref;
         }
         return r;
+    }
+
+    // MapIterator, reuse ConstMapIterator
+    bool MapIterator::next() {
+        return ((ConstMapIterator *)this)->next();
+    }
+    const std::string &MapIterator::key() const {
+        return ((ConstMapIterator *)this)->key();
+    }
+    NodeResult MapIterator::value() const {
+        return ((ConstMapIterator *)this)->value();
     }
 
     // Doc

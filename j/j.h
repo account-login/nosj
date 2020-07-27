@@ -75,6 +75,7 @@ namespace j {
         _Node *ref = NULL;
     };
 
+    // NOTE: the erased key is only marked for deletion, do not insert/erase on the same key frequently
     struct MapResult {
         bool ok() const {
             return !!this->ref;
@@ -95,6 +96,8 @@ namespace j {
         _Node *ref = NULL;
     };
 
+    // NOTE: the insertion order is preserved
+    // NOTE: the iterator is valid until MapResult::clear()
     struct ConstMapIterator {
         bool next();
         const std::string &key() const;
