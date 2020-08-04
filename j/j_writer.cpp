@@ -16,6 +16,32 @@ namespace j {
         // ref->key is reserved
     }
 
+    static bool _parse_digits(uint64_t *out, const char *begin, const char *end) {
+        if (begin >= end) {
+            return false;
+        }
+
+        uint64_t val = 0;
+        for (const char *i = begin; i < end; ++i) {
+            if (!('0' <= *i && *i <= '9')) {
+                return false;
+            }
+
+            if (val > ~uint64_t(0) / 10) {
+                return false;
+            }
+            val *= 10;
+            uint64_t d = *i - '0';
+            if (val + d < val) {
+                return false;
+            }
+            val += d;
+        }
+
+        *out = val;
+        return true;
+    }
+
     static _Node *_point(_Node *ref, const char *pointer) {
         while (ref && pointer[0]) {
             if (pointer[0] != '/') {
@@ -55,9 +81,8 @@ namespace j {
                 if (key == "-") {
                     ref = t.push_back().ref;
                 } else {
-                    errno = 0;
-                    uint64_t idx = strtoull(key.c_str(), NULL, 10);     // NOTE: accepts non-std index
-                    if (errno) {
+                    uint64_t idx = 0;
+                    if (!_parse_digits(&idx, key.data(), key.data() + key.size())) {    // NOTE: accepts non-std index
                         // bad array index
                         return NULL;
                     }

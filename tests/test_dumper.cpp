@@ -13,7 +13,7 @@
 using std::fpclassify;
 
 
-TEST_CASE("dumper") {
+TEST_CASE("dumper.basic") {
     j::Parser p;
     j::Doc doc;
     j::Dumper d;
@@ -36,10 +36,12 @@ TEST_CASE("dumper") {
     CASE(STR({"a":"b"}));
     CASE(STR({"a":"b","c":"d"}));
     CASE(STR("\"\\"));
+    CASE(STR(18014398509481985.0));     // inexact float
+    CASE(STR(1e1000000));               // inexact float
 
 #undef CASE
 
-    // escape control cahr
+    // escape control char
     doc.set_str("\x01");
     CHECK(STR("\u0001") == d.dump(doc));
     // T_DEL
@@ -52,4 +54,8 @@ TEST_CASE("dumper") {
     doc.set_arr().push_back();
     doc.set_arr().push_back().set_u64(3);
     CHECK(STR([1,3]) == d.dump(doc));
+
+    // inexact float
+    doc.set_double(18014398509481985.0);
+    CHECK(STR(18014398509481984) == d.dump(doc));
 }

@@ -1,5 +1,6 @@
 // system
 #include <stdlib.h>
+#include <float.h>
 // proj
 #include "j.h"
 #include "j_def.h"
@@ -7,75 +8,158 @@
 
 namespace j {
 
-    static bool _num_is_double(const _Node *ref) {
-        for (size_t i = 0; i < ref->val.size(); ++i) {
-            if (ref->val[i] == '.' || ref->val[i] == 'e' || ref->val[i] == 'E') {
-                return true;
+    static bool _push_digits(uint64_t *out, const char *begin, const char *end) {
+        uint64_t val = *out;
+
+        for (const char *i = begin; i < end; ++i) {
+            assert('0' <= *i && *i <= '9');
+
+            if (val > ~uint64_t(0) / 10) {
+                return false;
+            }
+            val *= 10;
+            uint64_t d = *i - '0';
+            if (val + d < val) {
+                return false;
+            }
+            val += d;
+        }
+
+        *out = val;
+        return true;
+    }
+
+    static bool _parse_digits(uint64_t *out, const char *begin, const char *end) {
+        if (begin >= end) {
+            return false;
+        }
+        for (const char *i = begin; i < end; ++i) {
+            if (!('0' <= *i && *i <= '9')) {
+                return false;
             }
         }
-        return false;
+
+        return _push_digits(out, begin, end);
+    }
+
+    // lossless convertion from a json number to uint64_t
+    static bool _parse_decimal(const char *input, uint64_t *out) {
+        // [0, whole_end) is the whole number part
+        size_t whole_end = 0;
+        while (input[whole_end] && input[whole_end] != '.' && input[whole_end] != 'e' && input[whole_end] != 'E') {
+            whole_end++;
+        }
+
+        // [frac_begin, frac_end) is the fraction number part
+        size_t frac_begin = whole_end;
+        if (input[frac_begin] == '.') {
+            frac_begin++;
+        }
+        size_t frac_end = frac_begin;
+        while (input[frac_end] && input[frac_end] != 'e' && input[frac_end] != 'E') {
+            frac_end++;
+        }
+
+        // the exp
+        uint32_t exp = 0;
+        bool exp_neg = false;
+        if (input[frac_end] == 'e' || input[frac_end] == 'E') {
+            size_t i = frac_end + 1;
+            if (input[i] == '-') {
+                exp_neg = true;
+                i++;
+            } else if (input[i] == '+') {
+                i++;
+            }
+            while (input[i]) {
+                exp *= 10;
+                exp += input[i] - '0';
+                i++;
+                if (exp > 10000) {
+                    return false;       // XXX: arbitary limit
+                }
+            }
+        }
+
+        // the whole number ajusted by exp
+        uint64_t val = 0;
+        if (exp_neg) {
+            // shift left
+            size_t end1 = whole_end > exp ? whole_end - exp : 0;
+            // check no frac
+            for (size_t i = end1; i < frac_end; ++i) {
+                if (input[i] == '.') {
+                    continue;
+                }
+                if (input[i] != '0') {
+                    return false;
+                }
+            }
+            // whole part
+            if (!_push_digits(&val, input, input + end1)) {
+                return false;
+            }
+        } else {
+            // shift right
+            size_t end2 = frac_begin + exp;
+            // check no frac
+            for (size_t i = end2; i < frac_end; ++i) {
+                if (input[i] != '0') {
+                    return false;
+                }
+            }
+            // whole part
+            if (!_push_digits(&val, input, input + whole_end)) {
+                return false;
+            }
+            size_t whole_end2 = end2 < frac_end ? end2 : frac_end;
+            if (!_push_digits(&val, input + frac_begin, input + whole_end2)) {
+                return false;
+            }
+            for (size_t i = frac_end; i < end2; ++i) {
+                if (val > ~uint64_t(0) / 10) {
+                    return false;
+                }
+                val *= 10;
+            }
+        }
+
+        // ok
+        if (out) {
+            *out = val;
+        }
+        return true;
     }
 
     static bool _parse_u64(const _Node *ref, uint64_t *out) {
         if (!ref || ref->type != T_NUM || ref->val[0] == '-') {
             return false;
         }
-        if (_num_is_double(ref)) {
-            errno = 0;
-            double d = strtod(ref->val.data(), NULL);
-            if (errno) {
-                // overflow
-                return false;
-            }
-            if ((double)(uint64_t)d != d) {
-                // inexact
-                return false;
-            }
-            if (out) {
-                *out = (uint64_t)d;
-            }
-        } else {
-            errno = 0;
-            uint64_t u = strtoull(ref->val.data(), NULL, 10);
-            if (errno) {
-                // overflow
-                return false;
-            }
-            if (out) {
-                *out = u;
-            }
-        }
-        return true;
+        return _parse_decimal(ref->val.c_str(), out);
     }
 
     static bool _parse_i64(const _Node *ref, int64_t *out) {
         if (!ref || ref->type != T_NUM) {
             return false;
         }
-        if (_num_is_double(ref)) {
-            errno = 0;
-            double d = strtod(ref->val.data(), NULL);
-            if (errno) {
-                // overflow
-                return false;
-            }
-            if ((double)(int64_t)d != d) {
-                // inexact
-                return false;
-            }
-            if (out) {
-                *out = (int64_t)d;
-            }
-        } else {
-            errno = 0;
-            int64_t i = strtoll(ref->val.data(), NULL, 10);
-            if (errno) {
-                // overflow
-                return false;
-            }
-            if (out) {
-                *out = i;
-            }
+        const char *input = ref->val.c_str();
+        bool neg = false;
+        if (input[0] == '-') {
+            neg = true;
+            input++;
+        }
+        uint64_t abs = 0;
+        if (!_parse_decimal(input, &abs)) {
+            return false;
+        }
+        if (!neg && abs > 0x7fffffffffffffffULL) {   // INT64_MAX
+            return false;
+        }
+        if (neg && abs > 0x8000000000000000ULL) {
+            return false;
+        }
+        if (out) {
+            *out = int64_t(neg ? -abs : abs);
         }
         return true;
     }
@@ -93,9 +177,17 @@ namespace j {
             d = -1.0 / 0.0;
         } else {
             errno = 0;
-            d = strtod(ref->val.data(), NULL);
-            if (errno) {
-                // overflow
+            char *end = NULL;
+            d = strtod(ref->val.data(), &end);
+            if (int err = errno) {
+                if (!(err == ERANGE && (-DBL_MIN <= d || d <= DBL_MIN))) {
+                    // overflow, not underflow
+                    return false;
+                }
+                // else underflow is ok
+            }
+            if (end != ref->val.data() + ref->val.size()) {
+                // bad format?
                 return false;
             }
         }
@@ -138,9 +230,8 @@ namespace j {
             } else if (ref->type == T_ARR) {
                 ArrayResult t;
                 t.ref = ref;
-                errno = 0;
-                uint64_t idx = strtoull(key.c_str(), NULL, 10);     // NOTE: accepts non-std index
-                if (errno) {
+                uint64_t idx = 0;
+                if (!_parse_digits(&idx, key.data(), key.data() + key.size())) {    // NOTE: accepts non-std index
                     // bad array index
                     return NULL;
                 }
