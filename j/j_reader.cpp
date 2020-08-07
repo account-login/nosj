@@ -1,6 +1,5 @@
 // system
 #include <stdlib.h>
-#include <float.h>
 // proj
 #include "j.h"
 #include "j_def.h"
@@ -176,16 +175,9 @@ namespace j {
         } else if (ref->val == "-Infinity") {
             d = -1.0 / 0.0;
         } else {
-            errno = 0;
             char *end = NULL;
             d = strtod(ref->val.data(), &end);
-            if (int err = errno) {
-                if (!(err == ERANGE && (-DBL_MIN <= d || d <= DBL_MIN))) {
-                    // overflow, not underflow
-                    return false;
-                }
-                // else underflow is ok
-            }
+            // overflow or underflow is ok
             if (end != ref->val.data() + ref->val.size()) {
                 // bad format?
                 return false;

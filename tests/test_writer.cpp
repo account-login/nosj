@@ -459,6 +459,9 @@ TEST_CASE("writer.nan.inf") {
     CHECK(FP_NAN == fpclassify(0.0 / 0.0));
     CHECK("NaN" == d.dump(doc));
 
+    doc.set_double(-(0.0 / 0.0));
+    CHECK("NaN" == d.dump(doc));
+
     doc.set_double(1.0 / 0.0);
     CHECK("Infinity" == d.dump(doc));
 
@@ -520,6 +523,16 @@ TEST_CASE("reader.number") {
     CHECK(doc.is_double());
     CHECK(f == doc.get_double(1));
 
+    // float overflow to inf
+    REQUIRE(p.parse(STR(1e1000), doc));
+    CHECK(doc.is_double());
+    CHECK(FP_INFINITE == fpclassify(doc.get_double(0)));
+    // float overflow to -inf
+    REQUIRE(p.parse(STR(-1e1000), doc));
+    CHECK(doc.is_double());
+    CHECK(FP_INFINITE == fpclassify(doc.get_double(0)));
+    CHECK(0 > doc.get_double(0));
+
     // range
     REQUIRE(p.parse(STR(-1), doc));
     CHECK_FALSE(doc.is_u64());
@@ -540,6 +553,7 @@ TEST_CASE("reader.number") {
     CHECK(0 > doc.get_double(0.0));
     // not ok, extra sign
     CHECK_FALSE(p.parse(STR(+Infinity), doc));
+    CHECK_FALSE(p.parse(STR(-NaN), doc));
 
     // limit
     REQUIRE(p.parse(STR(1e1000000), doc));
