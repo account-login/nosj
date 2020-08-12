@@ -28,6 +28,7 @@ def rules(ctx):
     c_test_files = [
         'tests/test_parser.cpp',
         'tests/test_dumper.cpp',
+        'tests/test_reader.cpp',
         'tests/test_writer.cpp',
         'tests/test_run_json_test_suite.cpp',
     ]

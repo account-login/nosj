@@ -36,6 +36,12 @@ _out/tests/test_dumper.o: tests/test_dumper.cpp
 
 -include _out/tests/test_dumper.d
 
+_out/tests/test_reader.o: tests/test_reader.cpp
+	mkdir -p _out/tests
+	g++ -std=gnu++11 -Wall -Wextra -g -fdiagnostics-color=always -Og --coverage -o _out/tests/test_reader.o -c tests/test_reader.cpp -MD -MP
+
+-include _out/tests/test_reader.d
+
 _out/tests/test_writer.o: tests/test_writer.cpp
 	mkdir -p _out/tests
 	g++ -std=gnu++11 -Wall -Wextra -g -fdiagnostics-color=always -Og --coverage -o _out/tests/test_writer.o -c tests/test_writer.cpp -MD -MP
@@ -54,19 +60,22 @@ test_parser: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writ
 test_dumper: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_dumper.o
 	g++ -coverage -o test_dumper _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_dumper.o
 
+test_reader: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_reader.o
+	g++ -coverage -o test_reader _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_reader.o
+
 test_writer: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_writer.o
 	g++ -coverage -o test_writer _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_writer.o
 
 test_run_json_test_suite: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_run_json_test_suite.o
 	g++ -coverage -o test_run_json_test_suite _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/tests/test_run_json_test_suite.o
 
-test: test_parser test_dumper test_writer test_run_json_test_suite
+test: test_parser test_dumper test_reader test_writer test_run_json_test_suite
 	true
 
 lcov-zero: 
 	lcov --directory . --zerocounters
 
-lcov-html: _out/j/j_dumper.gcda _out/j/j_parser.gcda _out/j/j_reader.gcda _out/j/j_writer.gcda _out/tests/test_writer.gcda
+lcov-html: _out/j/j_dumper.gcda _out/j/j_parser.gcda _out/j/j_reader.gcda _out/j/j_writer.gcda _out/tests/test_reader.gcda _out/tests/test_writer.gcda
 	lcov --directory . --capture --include '/cygdrive/c/tanzhuo/nosj/*' --rc lcov_branch_coverage=1 --output-file _out/cov.info
 	genhtml --prefix /cygdrive/c/tanzhuo/nosj --rc lcov_branch_coverage=1 _out/cov.info --output-directory=lcov-html
 
