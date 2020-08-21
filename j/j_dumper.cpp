@@ -25,7 +25,7 @@ namespace j {
         ans.push_back('"');
     }
 
-    static void dump_val(const Dumper &opts, _Node *ref, std::string &ans) {
+    static void dump_val(const Dumper &opts, _Node *ref, std::string &ans, uint32_t level) {
         assert(ref->type != T_DEL);
         if (ref->type == T_NULL) {
             ans.append("null");
@@ -46,9 +46,19 @@ namespace j {
                 }
                 if (!first) {
                     ans.push_back(',');
+                    if (opts.indent == 0 && opts.spacing) {
+                        ans.push_back(' ');
+                    }
+                }
+                if (opts.indent > 0) {
+                    ans.push_back('\n');
+                    ans.append(opts.indent * level, ' ');
                 }
                 first = false;
-                dump_val(opts, &ref->values[i], ans);
+                dump_val(opts, &ref->values[i], ans, level + 1);
+            }
+            if (!first && opts.indent > 0) {
+                ans.push_back('\n');
             }
             ans.push_back(']');
         } else if (ref->type == T_MAP) {
@@ -60,11 +70,24 @@ namespace j {
                 }
                 if (!first) {
                     ans.push_back(',');
+                    if (opts.indent == 0 && opts.spacing) {
+                        ans.push_back(' ');
+                    }
+                }
+                if (opts.indent > 0) {
+                    ans.push_back('\n');
+                    ans.append(opts.indent * level, ' ');
                 }
                 first = false;
                 dump_str(opts, ref->values[i].key, ans);
                 ans.push_back(':');
-                dump_val(opts, &ref->values[i], ans);
+                if (opts.spacing) {
+                    ans.push_back(' ');
+                }
+                dump_val(opts, &ref->values[i], ans, level + 1);
+            }
+            if (!first && opts.indent > 0) {
+                ans.push_back('\n');
             }
             ans.push_back('}');
         } else {
@@ -72,13 +95,12 @@ namespace j {
         }
     }
 
-    // TODO: options
     std::string Dumper::dump(const Doc &doc) const {
         std::string ans;
         if (!doc.ref || doc.ref->type == T_DEL) {
             return ans;
         }
-        dump_val(*this, doc.ref, ans);
+        dump_val(*this, doc.ref, ans, 1);
         return ans;
     }
 

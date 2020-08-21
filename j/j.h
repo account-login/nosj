@@ -161,10 +161,10 @@ namespace j {
 
     struct Parser {
         // options
-        bool disallow_nan = false;
-        bool allow_comment = false;
-        bool allow_extra_comma = false;
-        bool validate_string = false;
+        // bool disallow_nan = false;
+        // bool allow_comment = false;
+        // bool allow_extra_comma = false;
+        // bool validate_string = false;
         uint32_t recursion_limit = 100;
         // methods
         bool parse(const char *begin, const char *end, Doc &doc);
@@ -184,8 +184,10 @@ namespace j {
 
     struct Dumper {
         // options
-        bool disallow_nan = false;
-        bool ensure_ascii = false;
+        // bool ensure_ascii = false;
+        // const char *nan = NULL;
+        // const char *positive_inf = NULL;
+        // const char *negative_inf = NULL;
         bool spacing = false;
         uint32_t indent = 0;
         // methods

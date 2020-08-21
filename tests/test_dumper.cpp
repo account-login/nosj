@@ -59,3 +59,82 @@ TEST_CASE("dumper.basic") {
     doc.set_double(18014398509481985.0);
     CHECK(STR(18014398509481984) == d.dump(doc));
 }
+
+TEST_CASE("dumper.indent") {
+    j::Parser p;
+    j::Doc doc;
+    j::Doc da;
+    j::Dumper d;
+
+    // {}
+    REQUIRE(p.parse(STR({}), doc));
+    REQUIRE(p.parse(STR([]), da));
+
+    d.spacing = false;
+    d.indent = 0;
+    CHECK(STR({}) == d.dump(doc));
+    CHECK(STR([]) == d.dump(da));
+
+    d.spacing = true;
+    d.indent = 0;
+    CHECK(STR({}) == d.dump(doc));
+    CHECK(STR([]) == d.dump(da));
+
+    d.spacing = true;
+    d.indent = 2;
+    CHECK(STR({}) == d.dump(doc));
+    CHECK(STR([]) == d.dump(da));
+
+    d.spacing = false;
+    d.indent = 2;
+    CHECK(STR({}) == d.dump(doc));
+    CHECK(STR([]) == d.dump(da));
+
+    // {a: 1}
+    doc.set_map().key("a").set_u64(1);
+    da.set_arr().push_back().set_u64(1);
+
+    d.spacing = true;
+    d.indent = 0;
+    CHECK("{\"a\": 1}" == d.dump(doc));
+    CHECK("[1]" == d.dump(da));
+
+    d.spacing = false;
+    d.indent = 0;
+    CHECK("{\"a\":1}" == d.dump(doc));
+    CHECK("[1]" == d.dump(da));
+
+    d.spacing = false;
+    d.indent = 2;
+    CHECK("{\n  \"a\":1\n}" == d.dump(doc));
+    CHECK("[\n  1\n]" == d.dump(da));
+
+    d.spacing = true;
+    d.indent = 2;
+    CHECK("{\n  \"a\": 1\n}" == d.dump(doc));
+    CHECK("[\n  1\n]" == d.dump(da));
+
+    // {a: 1, b: 2}
+    doc.set_map().key("b").set_u64(2);
+    da.set_arr().push_back().set_u64(2);
+
+    d.spacing = false;
+    d.indent = 0;
+    CHECK("{\"a\":1,\"b\":2}" == d.dump(doc));
+    CHECK("[1,2]" == d.dump(da));
+
+    d.spacing = true;
+    d.indent = 0;
+    CHECK("{\"a\": 1, \"b\": 2}" == d.dump(doc));
+    CHECK("[1, 2]" == d.dump(da));
+
+    d.spacing = true;
+    d.indent = 2;
+    CHECK("{\n  \"a\": 1,\n  \"b\": 2\n}" == d.dump(doc));
+    CHECK("[\n  1,\n  2\n]" == d.dump(da));
+
+    d.spacing = false;
+    d.indent = 2;
+    CHECK("{\n  \"a\":1,\n  \"b\":2\n}" == d.dump(doc));
+    CHECK("[\n  1,\n  2\n]" == d.dump(da));
+}
