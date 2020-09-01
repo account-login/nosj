@@ -153,7 +153,7 @@ TEST_CASE("parser.num.conversion") {
     // float overflow
     REQUIRE(p.parse("1e1000", doc));
     CHECK(doc.is_number());
-    CHECK_FALSE(doc.is_double());
+    CHECK(doc.is_double());
     CHECK(doc.get_number("") == "1e1000");
 
     // exact u64
