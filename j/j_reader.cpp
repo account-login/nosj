@@ -216,9 +216,9 @@ namespace j {
             }
             // access key
             if (ref->type == T_MAP) {
-                MapResult t;
+                ConstMapResult t;
                 t.ref = ref;
-                ref = ((const MapResult)t).key(key.c_str()).ref;    // lookup only
+                ref = t.key(key.c_str()).ref;       // lookup only
             } else if (ref->type == T_ARR) {
                 ArrayResult t;
                 t.ref = ref;
@@ -297,8 +297,8 @@ namespace j {
     bool _NodeReader::is_arr() const {
         return this->get_arr().ok();
     }
-    const ArrayResult _NodeReader::get_arr() const {
-        ArrayResult r;
+    ConstArrayResult _NodeReader::get_arr() const {
+        ConstArrayResult r;
         if (ref && ref->type == T_ARR) {
             r.ref = (_Node *)ref;
         }
@@ -307,8 +307,8 @@ namespace j {
     bool _NodeReader::is_map() const {
         return this->get_map().ok();
     }
-    const MapResult _NodeReader::get_map() const {
-        MapResult r;
+    ConstMapResult _NodeReader::get_map() const {
+        ConstMapResult r;
         if (ref && ref->type == T_MAP) {
             r.ref = (_Node *)ref;
         }
@@ -319,11 +319,11 @@ namespace j {
     }
 
     // ArrayResult
-    size_t ArrayResult::size() const {
+    size_t _ArrayReader::size() const {
         return ref ? ref->values.size() : 0;
     }
-    const NodeResult ArrayResult::at(size_t i) const {
-        NodeResult r;
+    ConstNodeResult _ArrayReader::at(size_t i) const {
+        ConstNodeResult r;
         if (ref && i < ref->values.size()) {
             r.ref = &ref->values[i];
         }
@@ -331,16 +331,16 @@ namespace j {
     }
 
     // MapResult
-    size_t MapResult::size() const {
+    size_t _MapReader::size() const {
         return ref ? ref->keys.size() : 0;
     }
-    const NodeResult MapResult::point(const char *pointer) const {
-        NodeResult r;
+    ConstNodeResult _MapReader::point(const char *pointer) const {
+        ConstNodeResult r;
         r.ref = _point(ref, pointer);
         return r;
     }
-    const NodeResult MapResult::key(const char *key) const {
-        NodeResult r;
+    ConstNodeResult _MapReader::key(const char *key) const {
+        ConstNodeResult r;
         if (!ref) {
             return r;
         }
@@ -353,7 +353,7 @@ namespace j {
         }
         return r;
     }
-    ConstMapIterator MapResult::iter() const {
+    ConstMapIterator _MapReader::iter() const {
         ConstMapIterator r;
         r.ref = ref;
         return r;
@@ -382,8 +382,8 @@ namespace j {
         }
         return ref->values[i].key;
     }
-    const NodeResult ConstMapIterator::value() const {
-        NodeResult r;
+    ConstNodeResult ConstMapIterator::value() const {
+        ConstNodeResult r;
         if (ref && i < ref->values.size() && ref->values[i].type != T_DEL) {
             r.ref = &ref->values[i];
         }

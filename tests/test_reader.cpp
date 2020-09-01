@@ -86,7 +86,7 @@ TEST_CASE("reader.pointer") {
         "e": {"": {"": 9}},
         "l1": {"l2": {"l3": 5, "": 6}}
     }), doc));
-    const j::MapResult n = doc.get_map();
+    j::ConstMapResult n = doc.get_map();
     // invalid pointer
     CHECK_FALSE(n.point("a").ok());
     CHECK_FALSE(n.point("/a~").ok());
@@ -119,7 +119,7 @@ TEST_CASE("reader.iterator.invalid") {
 TEST_CASE("reader.iterator.loop") {
     j::Doc doc;
     j::MapResult n = doc.set_map();
-    const j::MapResult mr = doc.get_map();
+    j::ConstMapResult mr = doc.get_map();
     const char *empty_str = j::ConstMapIterator().key().c_str();
     CHECK(empty_str[0] == '\0');
 

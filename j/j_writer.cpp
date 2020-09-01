@@ -282,7 +282,9 @@ namespace j {
         return ((ConstMapIterator *)this)->key();
     }
     NodeResult MapIterator::value() const {
-        return ((ConstMapIterator *)this)->value();
+        NodeResult r;
+        r.ref = ((ConstMapIterator *)this)->value().ref;
+        return r;
     }
 
     // Doc

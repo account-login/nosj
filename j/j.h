@@ -10,7 +10,9 @@
 namespace j {
 
     struct NodeResult;
+    struct ConstArrayResult;
     struct ArrayResult;
+    struct ConstMapResult;
     struct MapResult;
     struct ConstMapIterator;
     struct MapIterator;
@@ -37,14 +39,16 @@ namespace j {
         bool is_str() const;
         const std::string &get_str(const std::string &def) const;
         bool is_arr() const;
-        const ArrayResult get_arr() const;
+        ConstArrayResult get_arr() const;
         bool is_map() const;
-        const MapResult get_map() const;
+        ConstMapResult get_map() const;
         _MovingNode clone() const;
 
         // private
         _Node *ref = NULL;
     };
+
+    struct ConstNodeResult : _NodeReader {};
 
     struct NodeResult : _NodeReader {
         // writer
@@ -58,42 +62,52 @@ namespace j {
         MapResult set_map();
     };
 
-    struct ArrayResult {
+    struct _ArrayReader {
         bool ok() const {
             return !!this->ref;
         }
         // reader
         size_t size() const;
-        const NodeResult at(size_t i) const;
-        // writer
-        NodeResult at(size_t i);
-        NodeResult push_back();
-        void erase(size_t i);
-        ArrayResult clear();
+        ConstNodeResult at(size_t i) const;
 
         // private
         _Node *ref = NULL;
     };
 
-    // NOTE: the erased key is only marked for deletion, do not insert/erase on the same key frequently
-    struct MapResult {
+    struct ConstArrayResult : _ArrayReader {};
+
+    struct ArrayResult : _ArrayReader {
+        // writer
+        NodeResult at(size_t i);
+        NodeResult push_back();
+        void erase(size_t i);
+        ArrayResult clear();
+    };
+
+    struct _MapReader {
         bool ok() const {
             return !!this->ref;
         }
         // reader
         size_t size() const;
-        const NodeResult point(const char *pointer) const;
-        const NodeResult key(const char *key) const;
+        ConstNodeResult point(const char *pointer) const;
+        ConstNodeResult key(const char *key) const;
         ConstMapIterator iter() const;
+
+        // private
+        _Node *ref = NULL;
+    };
+
+    struct ConstMapResult : _MapReader {};
+
+    // NOTE: the erased key is only marked for deletion, do not insert/erase on the same key frequently
+    struct MapResult : _MapReader {
         // writer
         NodeResult point(const char *pointer);
         NodeResult key(const char *key);
         MapIterator iter();
         bool erase(const char *key);
         MapResult clear();
-
-        // private
-        _Node *ref = NULL;
     };
 
     // NOTE: the insertion order is preserved
@@ -101,7 +115,7 @@ namespace j {
     struct ConstMapIterator {
         bool next();
         const std::string &key() const;
-        const NodeResult value() const;
+        ConstNodeResult value() const;
 
         // private
         _Node *ref = NULL;
