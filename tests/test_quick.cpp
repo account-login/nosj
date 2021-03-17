@@ -70,6 +70,12 @@ TEST_CASE("extract.scalar") {
     CHECK_FALSE(j::extract(STR({"a": 123}), "/a", s));
     CHECK(j::extract(STR({"a": "b"}), "/a", s));
     CHECK(s == "b");
+
+    bool b = false;
+    CHECK(j::extract(STR({"a": true}), "/a", b));
+    CHECK(b);
+    CHECK(j::extract(STR({"a": false}), "/a", b));
+    CHECK(!b);
 }
 
 TEST_CASE("extract.array") {

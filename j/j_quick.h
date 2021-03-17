@@ -391,6 +391,15 @@ namespace j {
     }
 
     template <>
+    inline bool __extract_scalar(ConstNodeResult h, bool &value) {
+        if (!h.is_bool()) {
+            return false;
+        }
+        value = h.get_bool(false);
+        return true;
+    }
+
+    template <>
     inline bool __extract_scalar(ConstNodeResult h, uint64_t &value) {
         return __extract_uint<uint64_t>(h, value);
     }

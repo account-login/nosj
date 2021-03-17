@@ -126,7 +126,7 @@ test: test_parser test_dumper test_reader test_writer test_quick test_run_json_t
 lcov-zero: 
 	lcov --directory . --zerocounters
 
-lcov-html: 
+lcov-html: _out/tests/test_quick.gcda _out/tests/test_run_json_test_suite.gcda _out/tests/test_parser.gcda _out/tests/test_writer.gcda _out/tests/test_dumper.gcda _out/tests/main.gcda _out/tests/test_reader.gcda _out/j/j_reader.gcda _out/j/j_parser.gcda _out/j/j_quick.gcda _out/j/j_dumper.gcda _out/j/j_writer.gcda
 	lcov --directory . --capture --include '/d2/nosj/*' --rc lcov_branch_coverage=1 --output-file _out/cov.info
 	genhtml --prefix /d2/nosj --rc lcov_branch_coverage=1 _out/cov.info --output-directory=lcov-html
 
