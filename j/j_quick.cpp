@@ -67,12 +67,13 @@ namespace j {
 
     bool parse_file(const char *filename, Doc &doc) {
         struct destructor {
-            uint8_t *buf = NULL;
+            uint8_t *buf;
 
             ~destructor() {
                 free(buf);
             }
         } local;
+        local.buf = NULL;
 
         size_t sz = 0;
         if (0 != read_file(filename, &local.buf, &sz)) {

@@ -2,10 +2,10 @@ import os
 import glob
 
 
-CXX = 'g++'
+CXX = os.environ.get('CXX') or 'g++'
 CXXFLAGS = '-std=gnu++11 -Wall -Wextra -g'.split()
 CXXFLAGS += '-Og --coverage'.split()
-LD = 'g++'
+LD = CXX
 LD_FLAGS = ['-coverage']
 
 

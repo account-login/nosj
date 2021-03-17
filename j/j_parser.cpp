@@ -8,7 +8,7 @@
 namespace j {
 
     struct _ParseError {
-        const char *pos = NULL;
+        const char *pos;
         std::string err;
 
         _ParseError(const char *pos, const std::string &err)
