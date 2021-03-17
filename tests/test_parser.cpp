@@ -127,6 +127,8 @@ TEST_CASE("parser.nan.inf") {
     CHECK(doc.get_double(0.0) > 0.0);
     REQUIRE(p.parse("-Infinity", doc));
     CHECK(doc.get_double(0.0) < 0.0);
+    CHECK(!doc.is_i64());
+    CHECK(!doc.is_u64());
     // bad
     CHECK_FALSE(p.parse("+Infinity", doc));
 }

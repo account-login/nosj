@@ -3,7 +3,7 @@ import glob
 
 
 CXX = 'g++'
-CXXFLAGS = '-std=gnu++11 -Wall -Wextra -g -fdiagnostics-color=always'.split()
+CXXFLAGS = '-std=gnu++11 -Wall -Wextra -g'.split()
 CXXFLAGS += '-Og --coverage'.split()
 LD = 'g++'
 LD_FLAGS = ['-coverage']
@@ -23,6 +23,7 @@ def rules(ctx):
         'j/j_parser.cpp',
         'j/j_reader.cpp',
         'j/j_writer.cpp',
+        'j/j_quick.cpp',
     ]
     o_lib_files = [o(file) for file in c_lib_files]
     c_test_files = [
@@ -30,6 +31,7 @@ def rules(ctx):
         'tests/test_dumper.cpp',
         'tests/test_reader.cpp',
         'tests/test_writer.cpp',
+        'tests/test_quick.cpp',
         'tests/test_run_json_test_suite.cpp',
     ]
     c_files = c_lib_files + c_test_files

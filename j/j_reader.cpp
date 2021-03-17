@@ -42,7 +42,12 @@ namespace j {
     }
 
     // lossless convertion from a json number to uint64_t
-    static bool _parse_decimal(const char *input, uint64_t *out) {
+    bool __parse_decimal(const char *input, uint64_t *out) {
+        // for NaN, Infinity
+        if (!('0' <= input[0] && input[0] <= '9')) {
+            return false;
+        }
+
         // [0, whole_end) is the whole number part
         size_t whole_end = 0;
         while (input[whole_end] && input[whole_end] != '.' && input[whole_end] != 'e' && input[whole_end] != 'E') {
@@ -134,7 +139,7 @@ namespace j {
         if (!ref || ref->type != T_NUM || ref->val[0] == '-') {
             return false;
         }
-        return _parse_decimal(ref->val.c_str(), out);
+        return __parse_decimal(ref->val.c_str(), out);
     }
 
     static bool _parse_i64(const _Node *ref, int64_t *out) {
@@ -148,7 +153,7 @@ namespace j {
             input++;
         }
         uint64_t abs = 0;
-        if (!_parse_decimal(input, &abs)) {
+        if (!__parse_decimal(input, &abs)) {
             return false;
         }
         if (!neg && abs > 0x7fffffffffffffffULL) {   // INT64_MAX
@@ -163,22 +168,19 @@ namespace j {
         return true;
     }
 
-    static bool _parse_double(const _Node *ref, double *out) {
-        if (!ref || ref->type != T_NUM) {
-            return false;
-        }
+    bool __parse_double(const std::string &val, double *out) {
         double d = 0;
-        if (ref->val == "NaN") {
+        if (val == "NaN") {
             d = 0.0 / 0.0;
-        } else if (ref->val == "Infinity") {
+        } else if (val == "Infinity") {
             d = 1.0 / 0.0;
-        } else if (ref->val == "-Infinity") {
+        } else if (val == "-Infinity") {
             d = -1.0 / 0.0;
         } else {
             char *end = NULL;
-            d = strtod(ref->val.data(), &end);
+            d = strtod(val.data(), &end);
             // overflow or underflow is ok
-            if (end != ref->val.data() + ref->val.size()) {
+            if (end != val.data() + val.size()) {
                 // bad format?
                 return false;
             }
@@ -187,6 +189,13 @@ namespace j {
             *out = d;
         }
         return true;
+    }
+
+    static bool _parse_double(const _Node *ref, double *out) {
+        if (!ref || ref->type != T_NUM) {
+            return false;
+        }
+        return __parse_double(ref->val, out);
     }
 
     static _Node *_point(_Node *ref, const char *pointer) {

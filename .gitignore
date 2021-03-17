@@ -37,3 +37,5 @@ __pycache__
 _out
 .vscode
 lcov-html
+/test_*
+core
