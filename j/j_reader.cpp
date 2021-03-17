@@ -409,5 +409,12 @@ namespace j {
         delete this->ref;
         this->ref = NULL;
     }
+    ConstNodeResult Doc::get_root() const {
+        ConstNodeResult r;
+        if (ref && ref->type != T_DEL) {
+            r.ref = ref;
+        }
+        return r;
+    }
 
 }   // ::j

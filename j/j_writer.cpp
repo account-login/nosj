@@ -288,72 +288,11 @@ namespace j {
     }
 
     // Doc
-    void Doc::set_null() {
+    NodeResult Doc::set_root() {
         if (!ref) {
             ref = new _Node();
         }
-
-        _clear(ref);
-        ref->type = T_NULL;
-    }
-    void Doc::set_bool(bool val) {
-        if (!ref) {
-            ref = new _Node();
-        }
-
-        _clear(ref);
-        ref->type = val ? T_TRUE : T_FALSE;
-    }
-    void Doc::set_u64(uint64_t val) {
-        if (!ref) {
-            ref = new _Node();
-        }
-        _set_u64(ref, val);
-    }
-    void Doc::set_i64(int64_t val) {
-        if (!ref) {
-            ref = new _Node();
-        }
-        _set_i64(ref, val);
-    }
-    void Doc::set_double(double val) {
-        if (!ref) {
-            ref = new _Node();
-        }
-        _set_double(ref, val);
-    }
-    void Doc::set_str(const std::string &val) {
-        if (!ref) {
-            ref = new _Node();
-        }
-
-        _clear(ref);
-        ref->type = T_STR;
-        ref->val = val;
-    }
-    ArrayResult Doc::set_arr() {
-        if (!ref) {
-            ref = new _Node();
-        }
-
-        if (ref->type != T_ARR) {
-            _clear(ref);
-            ref->type = T_ARR;
-        }
-        ArrayResult r;
-        r.ref = ref;
-        return r;
-    }
-    MapResult Doc::set_map() {
-        if (!ref) {
-            ref = new _Node();
-        }
-
-        if (ref->type != T_MAP) {
-            _clear(ref);
-            ref->type = T_MAP;
-        }
-        MapResult r;
+        NodeResult r;
         r.ref = ref;
         return r;
     }

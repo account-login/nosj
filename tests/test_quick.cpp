@@ -78,6 +78,12 @@ TEST_CASE("extract.scalar") {
     CHECK(!b);
 }
 
+TEST_CASE("get.empty.pointer") {
+    CHECK(j::get(STR(124), "", 0) == 124);
+    CHECK(j::get(STR("b"), "", std::string("c")) == "b");
+    CHECK(j::get(STR("a"), "", 1) == 1);
+}
+
 TEST_CASE("extract.array") {
     std::vector<int32_t> v32;
     CHECK(j::extract(STR({"a": []}), "/a", v32));

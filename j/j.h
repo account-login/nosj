@@ -161,20 +161,41 @@ namespace j {
         void operator=(const _MovingNode &);
     };
 
+    // NOTE: the reader/writer method on Doc is not necessary,
+    // NOTE: use the get_root()/set_root() method instead.
     struct Doc : _NodeReader {
         Doc() {}
         /* implicit */
         Doc(const _MovingNode &move);
         ~Doc();
+        // reader
+        ConstNodeResult get_root() const;
         // writer
-        void set_null();
-        void set_bool(bool val);
-        void set_u64(uint64_t val);
-        void set_i64(int64_t val);
-        void set_double(double val);
-        void set_str(const std::string &val);
-        ArrayResult set_arr();
-        MapResult set_map();
+        NodeResult set_root();
+        void set_null() {
+            return set_root().set_null();
+        }
+        void set_bool(bool val) {
+            return set_root().set_bool(val);
+        }
+        void set_u64(uint64_t val) {
+            return set_root().set_u64(val);
+        }
+        void set_i64(int64_t val) {
+            return set_root().set_i64(val);
+        }
+        void set_double(double val) {
+            return set_root().set_double(val);
+        }
+        void set_str(const std::string &val) {
+            return set_root().set_str(val);
+        }
+        ArrayResult set_arr() {
+            return set_root().set_arr();
+        }
+        MapResult set_map() {
+            return set_root().set_map();
+        }
         Doc &clear();
         _MovingNode move();
 

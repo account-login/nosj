@@ -26,6 +26,7 @@ namespace j {
 
     template <class T>
     inline void set(NodeResult h, const T &val);        // customizable
+    // TODO: set() with pointer
 
     // IMPL extract() BEGIN
 
@@ -477,7 +478,11 @@ namespace j {
 
     template <class T>
     inline bool extract(const Doc &doc, const char *pointer, T &out) {
-        return extract(doc.get_map().point(pointer), out);
+        ConstNodeResult r = doc.get_root();
+        if (pointer[0]) {
+            r = r.get_map().point(pointer);
+        }
+        return extract(r, out);
     }
 
     template <class T>
@@ -491,7 +496,6 @@ namespace j {
 
     // IMPL extract() END
 
-    // TODO: empty pointer
     template <class T>
     inline T get(const Doc &doc, const char *pointer, const T &def) {
         T ans;
