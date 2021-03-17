@@ -24,6 +24,7 @@ def rules(ctx):
         'j/j_reader.cpp',
         'j/j_writer.cpp',
         'j/j_quick.cpp',
+        'tests/main.cpp'
     ]
     o_lib_files = [o(file) for file in c_lib_files]
     c_test_files = [

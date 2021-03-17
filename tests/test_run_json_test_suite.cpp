@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../submodules/doctest/doctest/doctest.h"
 
 // system
@@ -6,6 +5,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <glob.h>
+#include <unistd.h>
+#include <string.h>
 #include <vector>
 // proj
 #include "../j/j.h"
