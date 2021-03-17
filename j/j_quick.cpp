@@ -4,13 +4,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 // proj
 #include "j_quick.h"
 
 
 namespace j {
 
-    int32_t __read_file(const char *filename, uint8_t **buf, size_t *sz) {
+    static int32_t read_file(const char *filename, uint8_t **buf, size_t *sz) {
         assert(*buf == NULL);
 
         int fd = ::open(filename, O_RDONLY);
@@ -62,6 +63,26 @@ namespace j {
             ::free(*buf);
         }
         return err;
+    }
+
+    bool parse_file(const char *filename, Doc &doc) {
+        struct destructor {
+            uint8_t *buf = NULL;
+
+            ~destructor() {
+                free(buf);
+            }
+        } local;
+
+        size_t sz = 0;
+        if (0 != read_file(filename, &local.buf, &sz)) {
+            return false;
+        }
+
+        if (sz == 0) {
+            return false;
+        }
+        return Parser().parse((const char *)local.buf, (const char *)(local.buf + sz), doc);
     }
 
 }   // ::j

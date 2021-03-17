@@ -7,7 +7,7 @@ namespace j {
 
     static const char *const k_hex = "0123456789abcdef";
 
-    static void dump_str(const Dumper &opts, const std::string &str, std::string &ans) {
+    static void dump_str(const Dumper &, const std::string &str, std::string &ans) {
         ans.push_back('"');
         for (size_t i = 0; i < str.size(); ++i) {
             char ch = str[i];

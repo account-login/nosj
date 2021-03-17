@@ -215,7 +215,7 @@ namespace j {
         ans.push_back(*cur);
         cur++;
         // remain of int
-        if (ans.back() != '0') {
+        if (ans[ans.size() - 1] != '0') {
             while (cur < end && ('0' <= *cur && *cur <= '9')) {
                 ans.push_back(*cur);
                 cur++;

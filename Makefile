@@ -30,12 +30,6 @@ _out/j/j_quick.o: j/j_quick.cpp
 
 -include _out/j/j_quick.d
 
-_out/tests/main.o: tests/main.cpp
-	mkdir -p _out/tests
-	g++ -std=gnu++11 -Wall -Wextra -g -Og --coverage -o _out/tests/main.o -c tests/main.cpp -MD -MP
-
--include _out/tests/main.d
-
 _out/tests/test_parser.o: tests/test_parser.cpp
 	mkdir -p _out/tests
 	g++ -std=gnu++11 -Wall -Wextra -g -Og --coverage -o _out/tests/test_parser.o -c tests/test_parser.cpp -MD -MP
@@ -72,31 +66,67 @@ _out/tests/test_run_json_test_suite.o: tests/test_run_json_test_suite.cpp
 
 -include _out/tests/test_run_json_test_suite.d
 
-test_parser: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_parser.o
-	g++ -coverage -o test_parser _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_parser.o
+_out/tests/main.o: tests/main.cpp
+	mkdir -p _out/tests
+	g++ -std=gnu++11 -Wall -Wextra -g -Og --coverage -o _out/tests/main.o -c tests/main.cpp -MD -MP
 
-test_dumper: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_dumper.o
-	g++ -coverage -o test_dumper _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_dumper.o
+-include _out/tests/main.d
 
-test_reader: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_reader.o
-	g++ -coverage -o test_reader _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_reader.o
+test_parser: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_parser.o _out/tests/main.o
+	g++ -coverage -o test_parser _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_parser.o _out/tests/main.o
 
-test_writer: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_writer.o
-	g++ -coverage -o test_writer _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_writer.o
+test_dumper: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_dumper.o _out/tests/main.o
+	g++ -coverage -o test_dumper _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_dumper.o _out/tests/main.o
 
-test_quick: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_quick.o
-	g++ -coverage -o test_quick _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_quick.o
+test_reader: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_reader.o _out/tests/main.o
+	g++ -coverage -o test_reader _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_reader.o _out/tests/main.o
 
-test_run_json_test_suite: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_run_json_test_suite.o
-	g++ -coverage -o test_run_json_test_suite _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/main.o _out/tests/test_run_json_test_suite.o
+test_writer: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_writer.o _out/tests/main.o
+	g++ -coverage -o test_writer _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_writer.o _out/tests/main.o
 
-test: test_parser test_dumper test_reader test_writer test_quick test_run_json_test_suite
+test_quick: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_quick.o _out/tests/main.o
+	g++ -coverage -o test_quick _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_quick.o _out/tests/main.o
+
+test_run_json_test_suite: _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_run_json_test_suite.o _out/tests/main.o
+	g++ -coverage -o test_run_json_test_suite _out/j/j_dumper.o _out/j/j_parser.o _out/j/j_reader.o _out/j/j_writer.o _out/j/j_quick.o _out/tests/test_run_json_test_suite.o _out/tests/main.o
+
+_out/j/j_dumper.c++98.o: j/j_dumper.cpp
+	mkdir -p _out/j
+	g++ -std=c++98 -Wall -Wextra -g -Og --coverage -o _out/j/j_dumper.c++98.o -c j/j_dumper.cpp -MD -MP
+
+-include _out/j/j_dumper.c++98.d
+
+_out/j/j_parser.c++98.o: j/j_parser.cpp
+	mkdir -p _out/j
+	g++ -std=c++98 -Wall -Wextra -g -Og --coverage -o _out/j/j_parser.c++98.o -c j/j_parser.cpp -MD -MP
+
+-include _out/j/j_parser.c++98.d
+
+_out/j/j_reader.c++98.o: j/j_reader.cpp
+	mkdir -p _out/j
+	g++ -std=c++98 -Wall -Wextra -g -Og --coverage -o _out/j/j_reader.c++98.o -c j/j_reader.cpp -MD -MP
+
+-include _out/j/j_reader.c++98.d
+
+_out/j/j_writer.c++98.o: j/j_writer.cpp
+	mkdir -p _out/j
+	g++ -std=c++98 -Wall -Wextra -g -Og --coverage -o _out/j/j_writer.c++98.o -c j/j_writer.cpp -MD -MP
+
+-include _out/j/j_writer.c++98.d
+
+_out/j/j_quick.c++98.o: j/j_quick.cpp
+	mkdir -p _out/j
+	g++ -std=c++98 -Wall -Wextra -g -Og --coverage -o _out/j/j_quick.c++98.o -c j/j_quick.cpp -MD -MP
+
+-include _out/j/j_quick.c++98.d
+
+test: test_parser test_dumper test_reader test_writer test_quick test_run_json_test_suite _out/j/j_dumper.c++98.o _out/j/j_parser.c++98.o _out/j/j_reader.c++98.o _out/j/j_writer.c++98.o _out/j/j_quick.c++98.o
 	true
 
 lcov-zero: 
 	lcov --directory . --zerocounters
 
-lcov-html: _out/tests/test_quick.gcda _out/tests/test_run_json_test_suite.gcda _out/tests/test_parser.gcda _out/tests/test_writer.gcda _out/tests/test_dumper.gcda _out/tests/main.gcda _out/tests/test_reader.gcda _out/j/j_reader.gcda _out/j/j_parser.gcda _out/j/j_quick.gcda _out/j/j_dumper.gcda _out/j/j_writer.gcda
+lcov-html: 
 	lcov --directory . --capture --include '/d2/nosj/*' --rc lcov_branch_coverage=1 --output-file _out/cov.info
 	genhtml --prefix /d2/nosj --rc lcov_branch_coverage=1 _out/cov.info --output-directory=lcov-html
 

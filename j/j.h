@@ -44,8 +44,10 @@ namespace j {
         ConstMapResult get_map() const;
         _MovingNode clone() const;
 
+        _NodeReader() : ref(NULL) {}
+
         // private
-        _Node *ref = NULL;
+        _Node *ref;
     };
 
     struct ConstNodeResult : _NodeReader {};
@@ -70,8 +72,10 @@ namespace j {
         size_t size() const;
         ConstNodeResult at(size_t i) const;
 
+        _ArrayReader() : ref(NULL) {}
+
         // private
-        _Node *ref = NULL;
+        _Node *ref;
     };
 
     struct ConstArrayResult : _ArrayReader {};
@@ -94,8 +98,10 @@ namespace j {
         ConstNodeResult key(const char *key) const;
         ConstMapIterator iter() const;
 
+        _MapReader() : ref(NULL) {}
+
         // private
-        _Node *ref = NULL;
+        _Node *ref;
     };
 
     struct ConstMapResult : _MapReader {};
@@ -117,9 +123,11 @@ namespace j {
         const std::string &key() const;
         ConstNodeResult value() const;
 
+        ConstMapIterator() : ref(NULL), i(~size_t(0)) {}
+
         // private
-        _Node *ref = NULL;
-        size_t i = ~size_t(0);
+        _Node *ref;
+        size_t i;
     };
 
     struct MapIterator {
@@ -127,9 +135,11 @@ namespace j {
         const std::string &key() const;
         NodeResult value() const;
 
+        MapIterator() : ref(NULL), i(~size_t(0)) {}
+
         // private
-        _Node *ref = NULL;
-        size_t i = ~size_t(0);
+        _Node *ref;
+        size_t i;
     };
 
     struct _MovingNode {
@@ -146,7 +156,7 @@ namespace j {
         }
 
         // private
-        mutable _Node *ref = NULL;
+        mutable _Node *ref;
     private:
         void operator=(const _MovingNode &);
     };
@@ -179,7 +189,7 @@ namespace j {
         // bool allow_comment = false;
         // bool allow_extra_comma = false;
         // bool validate_string = false;
-        uint32_t recursion_limit = 100;
+        uint32_t recursion_limit;
         // methods
         bool parse(const char *begin, const char *end, Doc &doc);
         bool parse(const char *begin, Doc &doc);
@@ -190,10 +200,17 @@ namespace j {
         size_t where() const {
             return this->errpos;
         }
+
+        Parser()
+            : recursion_limit(100)
+            , depth(0)
+            , errpos(0)
+        {}
+
         // private
-        uint32_t depth = 0;
+        uint32_t depth;
         std::string err;
-        size_t errpos = 0;
+        size_t errpos;
     };
 
     struct Dumper {
@@ -202,10 +219,12 @@ namespace j {
         // const char *nan = NULL;
         // const char *positive_inf = NULL;
         // const char *negative_inf = NULL;
-        bool spacing = false;
-        uint32_t indent = 0;
+        bool spacing;
+        uint32_t indent;
         // methods
         std::string dump(const Doc &doc) const;
+
+        Dumper() : spacing(false), indent(0) {}
     };
 
 }   // ::j

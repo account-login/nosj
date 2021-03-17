@@ -20,11 +20,13 @@ namespace j {
     };
 
     struct _Node {
-        uint32_t type = 0;
+        uint32_t type;
         std::string val;
         std::deque<_Node> values;
         std::map<std::string, size_t> keys;
         std::string key;
+
+        _Node() : type(0) {}
     };
 
 }   // ::j

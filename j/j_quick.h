@@ -10,7 +10,7 @@ namespace j {
     // API
 
     inline bool parse(const std::string &input, Doc &doc);
-    inline bool parse_file(const char *filename, Doc &doc);
+    bool parse_file(const char *filename, Doc &doc);
 
     template <class T>
     inline T get(const Doc &doc, const char *pointer, const T &def);
@@ -503,28 +503,6 @@ namespace j {
 
     inline bool parse(const std::string &input, Doc &doc) {
         return Parser().parse(input, doc);
-    }
-
-    int32_t __read_file(const char *filename, uint8_t **buf, size_t *sz);
-
-    inline bool parse_file(const char *filename, Doc &doc) {
-        struct destructor {
-            uint8_t *buf = NULL;
-
-            ~destructor() {
-                free(buf);
-            }
-        } local;
-
-        size_t sz = 0;
-        if (0 != __read_file(filename, &local.buf, &sz)) {
-            return false;
-        }
-
-        if (sz == 0) {
-            return false;
-        }
-        return Parser().parse((const char *)local.buf, (const char *)(local.buf + sz), doc);
     }
 
 }   // ::j
