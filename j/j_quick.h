@@ -12,21 +12,26 @@ namespace j {
     inline bool parse(const std::string &input, Doc &doc);
     bool parse_file(const char *filename, Doc &doc);
 
+    inline std::string dumps(const Doc &doc) {
+        return Dumper().dump(doc);
+    }
+
     template <class T>
     inline T get(const Doc &doc, const char *pointer, const T &def);
     template <class T>
     inline T get(const std::string &input, const char *pointer, const T &def);
 
     template <class T>
-    inline bool extract(ConstNodeResult h, T &out);     // customizable
+    inline bool extract(ConstNodeResult h, T &out);     // extensible
     template <class T>
     inline bool extract(const Doc &doc, const char *pointer, T &out);
     template <class T>
     inline bool extract(const std::string &input, const char *pointer, T &out);
 
     template <class T>
-    inline void set(NodeResult h, const T &val);        // customizable
-    // TODO: set() with pointer
+    inline void set(NodeResult h, const T &val);        // extensible
+    template <class T>
+    inline void set(Doc &doc, const char *pointer, const T &val);
 
     // IMPL extract() BEGIN
 
@@ -51,7 +56,9 @@ namespace j {
     __DEFINE_IS_SCALAR(int32_t);
     __DEFINE_IS_SCALAR(uint64_t);
     __DEFINE_IS_SCALAR(int64_t);
+    __DEFINE_IS_SCALAR(float);
     __DEFINE_IS_SCALAR(double);
+    __DEFINE_IS_SCALAR(const char *);
     __DEFINE_IS_SCALAR(std::string);
 
 #undef __DEFINE_IS_SCALAR
@@ -463,6 +470,16 @@ namespace j {
         return true;
     }
 
+    template <>
+    inline bool __extract_scalar(ConstNodeResult h, float &value) {
+        double out = h.get_double(42);
+        if (out == 42 && !h.is_double()) {
+            return false;
+        }
+        value = out;
+        return true;
+    }
+
     // scalar
     template <class T>
     struct __extract_impl<T, true> {
@@ -495,6 +512,143 @@ namespace j {
     }
 
     // IMPL extract() END
+
+    // IMPL set() BEGIN
+
+    // containers
+    template <class T, bool is_seq, bool is_map>
+    struct __set_container {
+        void operator()(NodeResult h, const T &val) const;
+    };
+
+    // set() seq
+    template <class T>
+    struct __set_container<T, true, false> {
+        void operator()(NodeResult h, const T &val) const {
+            ArrayResult r = h.set_arr();
+            r.clear();
+            for (typename T::const_iterator it = val.begin(); it != val.end(); ++it) {
+                set(r.push_back(), *it);
+            }
+        }
+    };
+
+    // set() map
+    // TODO: complex map
+    template <class T>
+    struct __set_container<T, false, true> {
+        void operator()(NodeResult h, const T &val) const {
+            MapResult r = h.set_map();
+            r.clear();
+            for (typename T::const_iterator it = val.begin(); it != val.end(); ++it) {
+                // TODO: convert key to string
+                set(r.key(it->first.c_str()), it->second);
+            }
+        }
+    };
+
+    // scalars
+    template <class T>
+    inline void __set_scalar(NodeResult h, const T &val);
+
+    template <>
+    inline void __set_scalar(NodeResult h, const bool &val) {
+        h.set_bool(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const uint64_t &val) {
+        h.set_u64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const uint32_t &val) {
+        h.set_u64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const uint16_t &val) {
+        h.set_u64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const uint8_t &val) {
+        h.set_u64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const int64_t &val) {
+        h.set_i64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const int32_t &val) {
+        h.set_i64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const int16_t &val) {
+        h.set_i64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const int8_t &val) {
+        h.set_i64(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const float &val) {
+        h.set_double(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const double &val) {
+        h.set_double(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const char *const &val) {
+        h.set_str(val);
+    }
+    template <>
+    inline void __set_scalar(NodeResult h, const std::string &val) {
+        h.set_str(val);
+    }
+
+    // set() container
+    template <class T, bool is_scalar>
+    struct __set_impl {
+        void operator()(NodeResult h, const T &val) const {
+            return __set_container<
+                T, __j_is_vec<T>::value || __j_is_set<T>::value, __j_is_map<T>::value
+            >()(h, val);
+        }
+    };
+
+    template <class T>
+    struct __set_impl<T, true> {
+        void operator()(NodeResult h, const T &val) const {
+            return __set_scalar<T>(h, val);
+        }
+    };
+
+    // https://stackoverflow.com/a/6559891
+    // for const char *
+    template <class T>
+    struct __j_array_to_pointer_decay {
+        typedef T type;
+    };
+
+    template <class T, std::size_t N>
+    struct __j_array_to_pointer_decay<T[N]> {
+        typedef const T *type;
+    };
+
+    template <class T>
+    inline void set(NodeResult h, const T &val) {
+        typedef typename __j_array_to_pointer_decay<T>::type T2;
+        return __set_impl<T2, __j_is_scalar<T2>::value>()(h, val);
+    }
+
+    template <class T>
+    inline void set(Doc &doc, const char *pointer, const T &val) {
+        NodeResult r = doc.set_root();
+        if (pointer[0]) {
+            r = r.set_map().point(pointer);
+        }
+        return set(r, val);
+    }
+
+    // IMPL set() END
 
     template <class T>
     inline T get(const Doc &doc, const char *pointer, const T &def) {

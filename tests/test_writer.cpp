@@ -245,3 +245,5 @@ TEST_CASE("writer.nan.inf") {
     doc.set_double(-1.0 / 0.0);
     CHECK("-Infinity" == d.dump(doc));
 }
+
+// TODO: TEST_CASE("map.size")

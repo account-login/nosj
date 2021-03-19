@@ -95,9 +95,9 @@ TEST_CASE("extract.array") {
     CHECK_FALSE(j::extract(STR({"a": [1, "b"]}), "/a", v32));
     CHECK_FALSE(j::extract(STR({"a": [1, 2147483648]}), "/a", v32));
 
-    std::vector<std::string> s32;
-    CHECK(j::extract(STR({"a": ["", "b"]}), "/a", s32));
-    CHECK(s32 == std::vector<std::string>{"", "b"});
+    std::vector<std::string> vs;
+    CHECK(j::extract(STR({"a": ["", "b"]}), "/a", vs));
+    CHECK(vs == std::vector<std::string>{"", "b"});
 
     std::vector<double> vf;
     CHECK(j::extract(STR({"a": [1, 2, -1, 0.5]}), "/a", vf));
@@ -175,4 +175,57 @@ TEST_CASE("extract.map.complex") {
     CHECK(mki.size() == 2);
     CHECK(mki[Key(1, "s1")] == -1);
     CHECK(mki[Key(2, "s2")] == 2);
+}
+
+TEST_CASE("set.scalar") {
+    j::Doc doc;
+    set(doc, "", int32_t(1));
+    CHECK(STR(1) == dumps(doc));
+
+    set(doc, "", false);
+    CHECK(STR(false) == dumps(doc));
+
+    set(doc, "", (double)NAN);
+    CHECK(STR(NaN) == dumps(doc));
+
+    set(doc, "", (float)-INFINITY);
+    CHECK(STR(-Infinity) == dumps(doc));
+
+    set(doc, "", std::string("asdf"));
+    CHECK(STR("asdf") == dumps(doc));
+
+    set(doc, "", "xyz");
+    CHECK(STR("xyz") == dumps(doc));
+}
+
+namespace j {
+    template <>
+    inline void set(NodeResult h, const Key &val) {
+        j::set(h.set_map().key("a"), val.a);
+        j::set(h.set_map().key("s"), val.s);
+    }
+}
+
+TEST_CASE("set.array") {
+    j::Doc doc;
+    std::vector<Key> vk;
+
+    set(doc, "/x", vk);
+    CHECK(STR({"x":[]}) == dumps(doc));
+
+    vk.push_back(Key(123, "xxx"));
+    set(doc, "/x", vk);
+    CHECK(STR({"x":[{"a":123,"s":"xxx"}]}) == dumps(doc));
+}
+
+TEST_CASE("set.map") {
+    j::Doc doc;
+    std::map<std::string, std::vector<Key>> mvk;
+
+    set(doc, "", mvk);
+    CHECK(STR({}) == dumps(doc));
+
+    mvk["k"].push_back(Key(12, "ab"));
+    set(doc, "", mvk);
+    CHECK(STR({"k":[{"a":12,"s":"ab"}]}) == dumps(doc));
 }
