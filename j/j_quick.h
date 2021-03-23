@@ -12,9 +12,9 @@ namespace j {
     inline bool parse(const std::string &input, Doc &doc);
     bool parse_file(const char *filename, Doc &doc);
 
-    inline std::string dumps(const Doc &doc) {
-        return Dumper().dump(doc);
-    }
+    inline std::string dumps(const Doc &doc);
+    template <class T>
+    inline std::string dumps(const T &val);
 
     template <class T>
     inline T get(const Doc &doc, const char *pointer, const T &def);
@@ -670,6 +670,17 @@ namespace j {
 
     inline bool parse(const std::string &input, Doc &doc) {
         return Parser().parse(input, doc);
+    }
+
+    inline std::string dumps(const Doc &doc) {
+        return Dumper().dump(doc);
+    }
+
+    template <class T>
+    inline std::string dumps(const T &val) {
+        Doc doc;
+        set(doc, "", val);
+        return dumps(doc);
     }
 
 }   // ::j

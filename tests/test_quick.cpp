@@ -229,3 +229,7 @@ TEST_CASE("set.map") {
     set(doc, "", mvk);
     CHECK(STR({"k":[{"a":12,"s":"ab"}]}) == dumps(doc));
 }
+
+TEST_CASE("dumps") {
+    CHECK(STR({}) == j::dumps(std::map<std::string, std::string>()));
+}
