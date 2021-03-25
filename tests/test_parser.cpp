@@ -172,4 +172,30 @@ TEST_CASE("parser.num.conversion") {
     CHECK(doc.get_double(0.0) == (double)3622009729038561421);
 }
 
+TEST_CASE("parser.comments") {
+    j::Parser p;
+    j::Doc doc;
+
+    REQUIRE_FALSE(p.parse("1 // asdf", doc));
+
+    p.allow_comment = true;
+    CHECK(p.parse("1 // asdf", doc));
+    CHECK(doc.get_u64(0) == 1);
+    CHECK(p.parse("1 // asdf\n", doc));
+    CHECK(doc.get_u64(0) == 1);
+    CHECK(p.parse("// asdf\n 1", doc));
+    CHECK(doc.get_u64(0) == 1);
+    CHECK(p.parse("/**/ 1", doc));
+    CHECK(doc.get_u64(0) == 1);
+    CHECK(p.parse("/**/\n 1", doc));
+    CHECK(doc.get_u64(0) == 1);
+    CHECK(p.parse("/*abc*/\n 1", doc));
+    CHECK(doc.get_u64(0) == 1);
+
+    CHECK(p.parse("[/*abc*/]", doc));
+    CHECK(doc.is_arr());
+    CHECK(p.parse("[/*abc*/ /*def*/ /*xxx*/] //a\n//\n//\n", doc));
+    CHECK(doc.is_arr());
+}
+
 // TODO: more cases

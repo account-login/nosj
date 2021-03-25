@@ -207,7 +207,7 @@ namespace j {
     struct Parser {
         // options
         // bool disallow_nan = false;
-        // bool allow_comment = false;
+        bool allow_comment;
         // bool allow_extra_comma = false;
         // bool validate_string = false;
         uint32_t recursion_limit;
@@ -223,7 +223,8 @@ namespace j {
         }
 
         Parser()
-            : recursion_limit(100)
+            : allow_comment(false)
+            , recursion_limit(100)
             , depth(0)
             , errpos(0)
         {}

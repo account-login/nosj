@@ -25,6 +25,59 @@ namespace j {
         }
     }
 
+    static void skip_comment(const char *&cur, const char *end) {
+        if (cur + 2 <= end && cur[0] == '/' && cur[1] == '/') {
+            cur += 2;
+            while (cur < end && *cur != '\n') {
+                cur++;
+            }
+        } else if (cur + 2 <= end && cur[0] == '/' && cur[1] == '*') {
+            cur += 2;
+            while (cur + 2 <= end) {
+                if (cur[0] == '*' && cur[1] == '/') {
+                    cur += 2;
+                    return;
+                }
+                cur++;
+            }
+            throw _ParseError(cur, "unexpected end of block comment");
+        }
+    }
+
+    static void skip_to_token(const Parser &parser, const char *&cur, const char *end) {
+        if (!parser.allow_comment) {
+            return skip_space(cur, end);
+        }
+
+        while (true) {
+            const char *saved = cur;
+            skip_space(cur, end);
+            skip_comment(cur, end);
+            if (saved == cur) {
+                return;
+            }
+        }
+    }
+
+    static void skip_to_eof(const Parser &parser, const char *&cur, const char *end) {
+        while (true) {
+            const char *saved = cur;
+            while (cur < end && (*cur == ' ' || *cur == '\t' || *cur == '\n' || *cur == '\r')) {
+                cur++;
+            }
+            if (parser.allow_comment) {
+                skip_comment(cur, end);
+            }
+            if (saved == cur) {
+                break;
+            }
+        }
+
+        if (cur < end) {
+            throw _ParseError(cur, "trailing garbage");
+        }
+    }
+
     static void expect_char(const char *&cur, const char *end, char ch, const char *name) {
         if (cur >= end || *cur != ch) {
             throw _ParseError(cur, std::string("expect ") + name);
@@ -41,8 +94,8 @@ namespace j {
         }
     }
 
-    static bool maybe_char_sp(const char *&cur, const char *end, char ch) {
-        skip_space(cur, end);
+    static bool maybe_char_sp(const Parser &parser, const char *&cur, const char *end, char ch) {
+        skip_to_token(parser, cur, end);
         return maybe_char(cur, end, ch);
     }
 
@@ -245,19 +298,19 @@ namespace j {
             throw _ParseError(cur, "recursion limit");
         }
 
-        skip_space(cur, end);
+        skip_to_token(parser, cur, end);
         // map
         if (maybe_char(cur, end, '{')) {
-            while (!maybe_char_sp(cur, end, '}')) {
+            while (!maybe_char_sp(parser, cur, end, '}')) {
                 // comma
                 if (!node.values.empty()) {
                     expect_char(cur, end, ',', "comma");
                 }
                 // key
-                skip_space(cur, end);
+                skip_to_token(parser, cur, end);
                 std::string key = parse_str(cur, end);
                 // colon
-                skip_space(cur, end);
+                skip_to_token(parser, cur, end);
                 expect_char(cur, end, ':', "colon");
                 // value
                 node.values.push_back(_Node());
@@ -277,7 +330,7 @@ namespace j {
         }
         // array
         else if (maybe_char(cur, end, '[')) {
-            while (!maybe_char_sp(cur, end, ']')) {
+            while (!maybe_char_sp(parser, cur, end, ']')) {
                 // comma
                 if (!node.values.empty()) {
                     expect_char(cur, end, ',', "comma");
@@ -342,12 +395,7 @@ namespace j {
             const char *cur = begin;
             parse_value(*this, cur, end, *doc.ref);
             // trailing garbage
-            while (cur < end && (*cur == ' ' || *cur == '\t' || *cur == '\n' || *cur == '\r')) {
-                cur++;
-            }
-            if (cur < end) {
-                throw _ParseError(cur, "trailing garbage");
-            }
+            skip_to_eof(*this, cur, end);
         } catch (_ParseError &exc) {
             this->err.swap(exc.err);
             this->errpos = exc.pos - begin;
