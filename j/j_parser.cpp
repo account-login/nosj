@@ -306,6 +306,9 @@ namespace j {
                 if (!node.values.empty()) {
                     expect_char(cur, end, ',', "comma");
                 }
+                if (parser.allow_extra_comma && !node.values.empty() && maybe_char_sp(parser, cur, end, '}')) {
+                    break;
+                }
                 // key
                 skip_to_token(parser, cur, end);
                 std::string key = parse_str(cur, end);
@@ -334,6 +337,9 @@ namespace j {
                 // comma
                 if (!node.values.empty()) {
                     expect_char(cur, end, ',', "comma");
+                }
+                if (parser.allow_extra_comma && !node.values.empty() && maybe_char_sp(parser, cur, end, ']')) {
+                    break;
                 }
                 // value
                 node.values.push_back(_Node());

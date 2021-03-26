@@ -198,4 +198,24 @@ TEST_CASE("parser.comments") {
     CHECK(doc.is_arr());
 }
 
+TEST_CASE("parser.comma") {
+    j::Parser p;
+    j::Doc doc;
+
+    REQUIRE_FALSE(p.parse("[,]", doc));
+    REQUIRE_FALSE(p.parse("[1,]", doc));
+    REQUIRE_FALSE(p.parse("{,}", doc));
+    REQUIRE_FALSE(p.parse(STR({"a":1,}), doc));
+
+    p.allow_extra_comma = true;
+    CHECK(p.parse("[1,]", doc));
+    CHECK(doc.get_arr().at(0).get_u64(0) == 1);
+
+    CHECK(p.parse(STR({"a":1,}), doc));
+    CHECK(doc.get_map().key("a").get_u64(0) == 1);
+
+    REQUIRE_FALSE(p.parse("[,]", doc));
+    REQUIRE_FALSE(p.parse("{,}", doc));
+}
+
 // TODO: more cases
