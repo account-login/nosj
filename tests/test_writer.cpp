@@ -246,4 +246,17 @@ TEST_CASE("writer.nan.inf") {
     CHECK("-Infinity" == d.dump(doc));
 }
 
+TEST_CASE("writer.set") {
+    j::Doc ddst;
+    j::Doc dsrc;
+    j::Dumper d;
+
+    dsrc.set_map().key("k1").set_i64(1);
+    dsrc.set_map().key("k2").set_i64(2);
+
+    ddst.set_map().key("p2").set(dsrc.set_map().key("k2"));
+    CHECK(STR({"p2":2}) == d.dump(ddst));
+    CHECK(STR({"k1":1,"k2":2}) == d.dump(dsrc));
+}
+
 // TODO: TEST_CASE("map.size")

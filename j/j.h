@@ -54,6 +54,8 @@ namespace j {
 
     struct NodeResult : _NodeReader {
         // writer
+        void set(ConstNodeResult src);
+        void set(NodeResult src);
         void set_null();
         void set_bool(bool val);
         void set_u64(uint64_t val);

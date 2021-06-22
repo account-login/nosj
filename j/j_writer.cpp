@@ -129,6 +129,20 @@ namespace j {
     }
 
     // NodeResult
+    void NodeResult::set(ConstNodeResult src) {
+        if (!ref || !src.ref) {
+            return;
+        }
+
+        // copy from src, but don't touch ref->key
+        ref->type = src.ref->type;  // XXX: what if src.ref->type == T_DEL
+        ref->val = src.ref->val;
+        ref->values = src.ref->values;
+        ref->keys = src.ref->keys;
+    }
+    void NodeResult::set(NodeResult src) {
+        set((ConstNodeResult &)src);
+    }
     void NodeResult::set_null() {
         if (!ref) {
             return;
